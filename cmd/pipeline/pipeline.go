@@ -1,9 +1,10 @@
 package pipeline
 
 import (
+	"io"
+
 	"github.com/spf13/cobra"
 	"github.com/spinnaker/spin/cmd/pipeline/execution"
-	"io"
 )
 
 type pipelineOptions struct{}
@@ -26,6 +27,7 @@ func NewPipelineCmd(out io.Writer) *cobra.Command {
 
 	// create subcommands
 	cmd.AddCommand(NewGetCmd(options))
+	cmd.AddCommand(NewPatchCmd(options))
 	cmd.AddCommand(NewListCmd(options))
 	cmd.AddCommand(NewDeleteCmd(options))
 	cmd.AddCommand(NewSaveCmd(options))

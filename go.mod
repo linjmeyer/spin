@@ -5,11 +5,13 @@ go 1.12
 require (
 	cloud.google.com/go v0.45.1 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/mitchellh/cli v1.0.0
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/posener/complete v1.2.1 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
