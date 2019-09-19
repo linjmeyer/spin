@@ -31,6 +31,8 @@ type PatchOptions struct {
 	application string
 	name        string
 	patch       string
+	disable     bool
+	enable      bool
 }
 
 var (
@@ -54,6 +56,8 @@ func NewPatchCmd(pipelineOptions pipelineOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVarP(&options.application, "application", "a", "", "Spinnaker application the pipeline belongs to")
 	cmd.PersistentFlags().StringVarP(&options.name, "name", "n", "", "name of the pipeline")
 	cmd.PersistentFlags().StringVarP(&options.patch, "patch", "p", "", "patch value in json")
+	cmd.PersistentFlags().BoolVar(&options.enable, "enable", false, "enables the pipeline")
+	cmd.PersistentFlags().BoolVar(&options.disable, "disable", false, "disables the pipeline")
 
 	return cmd
 }
@@ -68,8 +72,10 @@ func patchPipeline(cmd *cobra.Command, options PatchOptions) error {
 		return errors.New("one of required parameters 'application' or 'name' not set")
 	}
 
-	if options.patch == "" {
-		return errors.New("patch value must be set")
+	// Load all patch values (e.g. if they set --disabled, or a custom patch with --patch)
+	patches, err := getPatchValues(options)
+	if err != nil {
+		return nil
 	}
 
 	// Get pipeline
@@ -78,7 +84,7 @@ func patchPipeline(cmd *cobra.Command, options PatchOptions) error {
 		return nil
 	}
 
-	patchedPipelineBytes, err := jsonpatch.MergePatch(pipeline, []byte(options.patch))
+	patchedPipelineBytes, err := jsonpatch.MergePatch(pipeline, patches[0])
 	if err != nil {
 		return err
 	}
@@ -112,4 +118,21 @@ func loadPipelineJSON(gateClient *gateclient.GatewayClient, app string, name str
 	}
 
 	return pipelineJSON, nil
+}
+
+func getPatchValues(options PatchOptions) ([][]byte, error) {
+	patches := make([][]byte, 0)
+	// Add user patch
+	if options.patch != "" {
+		patches = append(patches, []byte(options.patch))
+	}
+
+	// Check --enable and --disable flags
+	if options.disable {
+		patches = append(patches, []byte("{\"disabled\":\"true\"}"))
+	} else if options.enable {
+		patches = append(patches, []byte("{\"disabled\":\"false\"}"))
+	}
+
+	return patches, nil
 }
